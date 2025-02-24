@@ -1,6 +1,8 @@
 ailearn/
 pip inenv/
 edu_fineweb10B/
+hellaswag/
+log/
 
 # Created by https://www.toptal.com/developers/gitignore/api/python
 # Edit at https://www.toptal.com/developers/gitignore?templates=python
