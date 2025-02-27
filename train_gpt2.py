@@ -337,7 +337,7 @@ enc = tiktoken.get_encoding('gpt2')
 
 total_batch_size = 524288 # 2**19, ~0.5M
 B = 16
-T = 512
+T = 1024
 assert total_batch_size % (B * T * ddp_world_size) == 0, 'total batch size must be divisible by B * T'
 grad_accum_steps = total_batch_size // (B * T * ddp_world_size)
 if master_process:
@@ -364,7 +364,7 @@ torch.set_float32_matmul_precision('high')
 # get logits
 model = GPT(GPTConfig(vocab_size=50304))
 model.to(device)
-# model = torch.compile(model)
+model = torch.compile(model)
 
 if ddp:
     model = DDP(model, device_ids=[ddp_local_rank])
