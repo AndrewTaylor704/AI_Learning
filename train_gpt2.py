@@ -335,8 +335,8 @@ if torch.cuda.is_available():
 
 enc = tiktoken.get_encoding('gpt2')
 
-total_batch_size = 524288 # 2**19, ~0.5M
-B = 16
+total_batch_size = 786432//2 # 2**19, ~0.5M
+B = 24
 T = 1024
 assert total_batch_size % (B * T * ddp_world_size) == 0, 'total batch size must be divisible by B * T'
 grad_accum_steps = total_batch_size // (B * T * ddp_world_size)
@@ -373,7 +373,7 @@ raw_model = model.module if ddp else model
 max_lr = 6e-4 * 3
 min_lr = max_lr * 0.1
 warmup_steps = 100
-max_steps = 19073
+max_steps = 19073 * 2
 def get_lr(it):
     # 1) linear warmup for warmup_iters steps
     if it < warmup_steps:
@@ -418,7 +418,7 @@ for step in range(max_steps):
     last_step = (step == max_steps - 1)
     
     # evaluate validation loss occasionally
-    if step % 250 == 0 or last_step:
+    if step % 500 == 0 or last_step:
         model.eval()
         val_loader.reset()
         with torch.no_grad():
@@ -449,7 +449,7 @@ for step in range(max_steps):
                 torch.save(checkpoint, checkpoint_path)
     
     # evaluate vs Hellaswag occasionally
-    if step % 250 == 0 or last_step:
+    if step % 500 == 0 or last_step:
         num_correct_norm = 0
         num_total = 0
         for i, example in enumerate(iterate_examples("val")):
@@ -482,7 +482,7 @@ for step in range(max_steps):
                 f.write(f'{step} hella {acc_norm:.4f}\n')
     
     # generate from the model occasionally
-    if (step > 0 and step % 250 == 0) or last_step:
+    if (step > 0 and step % 500 == 0) or last_step:
         model.eval()
         num_return_sequences = 4
         max_length = 32
